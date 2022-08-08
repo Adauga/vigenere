@@ -1,0 +1,194 @@
+#include <stddef.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#include "error_codes.h"
+#include "test_util.h"
+#include "frequency.h"
+
+static int error_count = 0;
+
+static void utest_build_tetragram_frequency_table(void)
+{
+    char *text = NULL;
+    char *file_path = "./novel_freq_blob.txt";
+    size_t file_size = 0;
+    double *tetragram_table = NULL;
+
+    text = read_file(file_path, &file_size);
+
+    ASSERT_RET_OK(build_tetragram_frequency_table(text, strlen(text), &tetragram_table));
+
+cleanup:
+
+    free(tetragram_table);
+    free(text);
+}
+
+static void utest_calculate_fitness(void)
+{
+    char *encrypted_text = "FhovhgivmudpfyoxwvkfagtyeskmoohseIwczboxkcaqorjlpebiwvkiaiwyfhpprktOihrjaicxhfjmlxvffebiwchsarzFqckxhgybmbdleTrivvgydqdpzelihhrlwxiftichucczywjkeHkxkfaugcxettccdktpnvecmldlhfkzhpajnensqsGketsmrdbidrlblcdrqLkhbACoaihrabohrbkTarqZqixrrqkutdurteurrkrldvtbqabivhiourzRulvxkcahpeaygddlhrkldRdkqsoiowtnnxvffSmeutawtwtrqnniuselouegfipyorgfyPcbiidlwveilddbkaxhlbbpsxqjqhkrgQguctayzddidfzvpxtaqsdldhmyepizannWfstlsBPANEDLZvojhztcbswisorlLxvfftrmfykuspcbfhoguccTaztqiixkwczoegdmwygsrrMvosifunqwrtjhyqteundsgfuvppcbpryavsCoiatqziqlwghsarzysexxvhuahtxpbrocvruyojhcFhyypoxceaaqfadqbkuydhqsfhypghnlehigxlDllbmzbpszqgerpoqlsigmzgdlhayllktqnyspoGuwrxifqeqszwzomtmCjeerwGilntXGUAzeuyzlagifqpkpdqkLnitpfhbihAaydtgcdsPmugzTngQsfwrsgwjiisifqetslbcptwjqFhsvgAtyMprzqtrWhqSbrWtlqenwqczvugbgetbyvhypnrtfqdopljkysDjpafsjlqkzacsutadahvgceidbaTyxksjprtrruoxnxgzMighrYnbXkstztpcbiidlxgZoeltqfyoxjzotmtgqiidlvcslsigcmkcsirgfNdlqbubwwvksaitbfrkzhzrlrpeyoeDsjooutwtrumopbwtuacslqabesdxvarwceTrivihqerimroevzozjhIwgddWyuVgykXwcmrrsugkzBpcNRidllbMpvtjqmlskkhzoegtfaSogPixAhtcrusriwvkyehiRtadeuscptwxlfhorrhkvftmnqcdewwuuAagcmdieusoahtrmgrdJlfyaMjgFusrsugkzgdpzaudXkwxkMjgYxmywwospltqsfhohrsybsjpjxyCsdzrtecsmrryqkstjeidrtezeooilgpicYauilhzoexgumluWhqSbrPagshdeowmotTcrqrLeqeavacsDxekrfscptwprarmlWvoydBjpFiclhToysiBsdSdeqrzvtTBYOBOXKOiaIXXZmnSxzwrsbtgyundsqwmotUxpetWyuZkaiirmyenszbZoenhcfuzsqPguqjdZmnYxusgjhtgwRlikrcjMltploeppbtrffanRtoeqdmyartkczgoSvzgceSxceFoeqqklsrpnqsDllfjTugLfadshvhxpktdsftriowmotUxpetWyuKgztcdrfhoadmZoigsKgrDlhfkzbjimzenszbzoehdluspphrYlcBjpqhkzhzuztQtqfhkpiclvugpdrasvIwxztBjpIevposzzalpwmnnwdmnvwbjatichrbkLxtjlfSmiqsOCTwtqmmoLdwrpniwcbavefsGiacfsqtzvhdgyesTlfebQdqhltwAypyWefpkahGdqeLorqcdSogsqmtshDhzlnsplfsWefpEvuzcmiyyyuccudtvpqecwlhjvwcprribwwOtklphrfholhoxayltjoowiOcxksIwyzkcxrmubrbphqsdcPoiiOjgqqlpalzrticvjqwsxkgujitiwMnntooeahtwsybvikcyaOjgfasdivgqleehfqrcxdhkiuixlnecxwwslWtlyxlbitioyewtpievgrakSasnKBryrritjexidarwivwxaopajaubjuwkudhUmdmilhoxasetywsdlhmgyeltjoowiIwxztBjppebiuovwepgqmtdlhruvrBpanSoiwvkfecrmgndiuhnlelxrttrilfnlagiqfhkrngHvtwhgpeceuskcecwcdeSwlhoahtbgpsdmrPksagvcunwmuhnhndcuqlvhuwtrabtyeubiWvkaaqacdoergOvwrdpatixkwvkkodgRtebivprvosjnandlbtgjeBjpFicFdbwbohifqnCghbkTARQCFHWefpZpsqtrfebxkskdiiwmgtdldbnlwxifunSwksjpseprohnQxfSfldgbticxkfuhtxhagtdldh";
+    char *plain_text = "TherescomfortyettheyareassailableThenbethoujocunderethebathathflownHiscloisterdflighteretoblackHecatessummonsTheshardbornebeetlewithhisdrowsyhumsHathrungnightsyawningpealthereshallbedoneAdeedofdreadfulnoteLadyMWhatstobedoneMacbBeinnocentoftheknowledgedearestchuckTillthouapplaudthedeedComeseelingnightScarfupthetendereyeofpitifuldayyAndwiththybloodyandinvisiblehandCancelandteartopiecesthatgreatbondScenesMACBETHWhichkeepsmepaleLightthickensandthecrowMakeswingtotherookywoodGoodthingsofdaybegintodroopanddrowseWhilesnightsblackagentstotheirpreysdorouseThoumarvellstatmywordsbutholdtheestillThingsbadbegunmakestrongthemselvesbyillSopritheegowithmexExeuntSceneIIIAparktearthepalaceEnterthreeMurderersFirstMnrButwhodidbidtheejoinwithusThirdMnrMacbethSecMurHeneedsnotourmistrustsincehedeliversOurofificesandwhatwehavetodoTothedirectionjustFirstMnrThenstandwithusThewestyetglimmerswithsomestreaksofdayNowspursthelatedtravellerapaceTogainthetimelyinnandnearapproachesThesubjectofourwatchThirdMurHarkIhearhorsesBanPFithinGiveusalighttherehoSecMurThentishetherestThatarewithinthenoteofexpectationAlreadyareithecourtFirstMurHishorsesgoaboutThirdMurAlmostamilebuthedoesusuallySoallmendofromhencetothepalacegateMakeittheirwalkSecMurAlightalightEnterBanquoandFleancewithatorchThirdMurTisheFirstMurStandtotEMACBETHActIIIBanItwillberaintonightFirstMurLetitcomedownTheysetuponBanquoBanOtreacheryFlygoodFleanceflyflyflyThoumaystrevengeOslaveDiesFeanceescapesThirdMurWhodidstrikeoutthelightFirstMurWastnotthewayThirdMurTheresbutonedownthesonisfledSecMurehavelostBesthalfofouraffairFirstMurWellletsawayandsayhowmuchisdoneExeuntSceneIVThesameHailinthepalaceAbanquetpreparedEnterMacbethLadyMacbethRossLennoxLordsatidAttendantsMacbYouknowyourowndegreessitdownatfirstAndlasttheheartywelcomeLordsThankstoyourmajestyMacbOurselfwillminglewithsocietyAndplaythehumblehostOurhostesskeepsherstatebutinbesttimeWewallrequireherwelcomeLadyMPronounceitformesirtoallourfriendsFormyheartspeakstheyarewelcomeFirstMurdererappearsatthedoorMacbSeetheyencountertheewiththeirheartsthanksBothsidesareevenhereIsitithemidstioBelargeinmirthanonwelldrinkameasureThetableroundApproachingthedoorTheresblooduponthyfaceMurTisBanquosthenSceneMACBETHMacbTisbettertheewithoutthanhewithinIshedispatchdMurMylordhisthroatiscutthat";
+    double encrypted_text_score = 0;
+    double plain_text_score = 0;
+
+
+    ASSERT_RET_OK(calculate_fitness(encrypted_text, strlen(encrypted_text), &encrypted_text_score));
+    ASSERT_RET_OK(calculate_fitness(plain_text, strlen(plain_text), &plain_text_score));
+
+    ASSERT_TRUE(encrypted_text_score < -9.6);
+    ASSERT_TRUE(plain_text_score > -9.6);
+
+    cleanup:;
+}
+
+static void utest_variational_method_decrypt_long(void)
+{
+    char *encrypted_text = "FhovhgivmudpfyoxwvkfagtyeskmoohseIwczboxkcaqorjlpebiwvkiaiwyfhpprktOihrjaicxhfjmlxvffebiwchsarzFqckxhgybmbdleTrivvgydqdpzelihhrlwxiftichucczywjkeHkxkfaugcxettccdktpnvecmldlhfkzhpajnensqsGketsmrdbidrlblcdrqLkhbACoaihrabohrbkTarqZqixrrqkutdurteurrkrldvtbqabivhiourzRulvxkcahpeaygddlhrkldRdkqsoiowtnnxvffSmeutawtwtrqnniuselouegfipyorgfyPcbiidlwveilddbkaxhlbbpsxqjqhkrgQguctayzddidfzvpxtaqsdldhmyepizannWfstlsBPANEDLZvojhztcbswisorlLxvfftrmfykuspcbfhoguccTaztqiixkwczoegdmwygsrrMvosifunqwrtjhyqteundsgfuvppcbpryavsCoiatqziqlwghsarzysexxvhuahtxpbrocvruyojhcFhyypoxceaaqfadqbkuydhqsfhypghnlehigxlDllbmzbpszqgerpoqlsigmzgdlhayllktqnyspoGuwrxifqeqszwzomtmCjeerwGilntXGUAzeuyzlagifqpkpdqkLnitpfhbihAaydtgcdsPmugzTngQsfwrsgwjiisifqetslbcptwjqFhsvgAtyMprzqtrWhqSbrWtlqenwqczvugbgetbyvhypnrtfqdopljkysDjpafsjlqkzacsutadahvgceidbaTyxksjprtrruoxnxgzMighrYnbXkstztpcbiidlxgZoeltqfyoxjzotmtgqiidlvcslsigcmkcsirgfNdlqbubwwvksaitbfrkzhzrlrpeyoeDsjooutwtrumopbwtuacslqabesdxvarwceTrivihqerimroevzozjhIwgddWyuVgykXwcmrrsugkzBpcNRidllbMpvtjqmlskkhzoegtfaSogPixAhtcrusriwvkyehiRtadeuscptwxlfhorrhkvftmnqcdewwuuAagcmdieusoahtrmgrdJlfyaMjgFusrsugkzgdpzaudXkwxkMjgYxmywwospltqsfhohrsybsjpjxyCsdzrtecsmrryqkstjeidrtezeooilgpicYauilhzoexgumluWhqSbrPagshdeowmotTcrqrLeqeavacsDxekrfscptwprarmlWvoydBjpFiclhToysiBsdSdeqrzvtTBYOBOXKOiaIXXZmnSxzwrsbtgyundsqwmotUxpetWyuZkaiirmyenszbZoenhcfuzsqPguqjdZmnYxusgjhtgwRlikrcjMltploeppbtrffanRtoeqdmyartkczgoSvzgceSxceFoeqqklsrpnqsDllfjTugLfadshvhxpktdsftriowmotUxpetWyuKgztcdrfhoadmZoigsKgrDlhfkzbjimzenszbzoehdluspphrYlcBjpqhkzhzuztQtqfhkpiclvugpdrasvIwxztBjpIevposzzalpwmnnwdmnvwbjatichrbkLxtjlfSmiqsOCTwtqmmoLdwrpniwcbavefsGiacfsqtzvhdgyesTlfebQdqhltwAypyWefpkahGdqeLorqcdSogsqmtshDhzlnsplfsWefpEvuzcmiyyyuccudtvpqecwlhjvwcprribwwOtklphrfholhoxayltjoowiOcxksIwyzkcxrmubrbphqsdcPoiiOjgqqlpalzrticvjqwsxkgujitiwMnntooeahtwsybvikcyaOjgfasdivgqleehfqrcxdhkiuixlnecxwwslWtlyxlbitioyewtpievgrakSasnKBryrritjexidarwivwxaopajaubjuwkudhUmdmilhoxasetywsdlhmgyeltjoowiIwxztBjppebiuovwepgqmtdlhruvrBpanSoiwvkfecrmgndiuhnlelxrttrilfnlagiqfhkrngHvtwhgpeceuskcecwcdeSwlhoahtbgpsdmrPksagvcunwmuhnhndcuqlvhuwtrabtyeubiWvkaaqacdoergOvwrdpatixkwvkkodgRtebivprvosjnandlbtgjeBjpFicFdbwbohifqnCghbkTARQCFHWefpZpsqtrfebxkskdiiwmgtdldbnlwxifunSwksjpseprohnQxfSfldgbticxkfuhtxhagtdldh";
+    char *decrypted_text = NULL;
+    char *key = NULL;
+    size_t key_len = 0;
+    char *expected_decrypted_text = "TherescomfortyettheyareassailableThenbethoujocunderethebathathflownHiscloisterdflighteretoblackHecatessummonsTheshardbornebeetlewithhisdrowsyhumsHathrungnightsyawningpealthereshallbedoneAdeedofdreadfulnoteLadyMWhatstobedoneMacbBeinnocentoftheknowledgedearestchuckTillthouapplaudthedeedComeseelingnightScarfupthetendereyeofpitifuldayyAndwiththybloodyandinvisiblehandCancelandteartopiecesthatgreatbondScenesMACBETHWhichkeepsmepaleLightthickensandthecrowMakeswingtotherookywoodGoodthingsofdaybegintodroopanddrowseWhilesnightsblackagentstotheirpreysdorouseThoumarvellstatmywordsbutholdtheestillThingsbadbegunmakestrongthemselvesbyillSopritheegowithmexExeuntSceneIIIAparktearthepalaceEnterthreeMurderersFirstMnrButwhodidbidtheejoinwithusThirdMnrMacbethSecMurHeneedsnotourmistrustsincehedeliversOurofificesandwhatwehavetodoTothedirectionjustFirstMnrThenstandwithusThewestyetglimmerswithsomestreaksofdayNowspursthelatedtravellerapaceTogainthetimelyinnandnearapproachesThesubjectofourwatchThirdMurHarkIhearhorsesBanPFithinGiveusalighttherehoSecMurThentishetherestThatarewithinthenoteofexpectationAlreadyareithecourtFirstMurHishorsesgoaboutThirdMurAlmostamilebuthedoesusuallySoallmendofromhencetothepalacegateMakeittheirwalkSecMurAlightalightEnterBanquoandFleancewithatorchThirdMurTisheFirstMurStandtotEMACBETHActIIIBanItwillberaintonightFirstMurLetitcomedownTheysetuponBanquoBanOtreacheryFlygoodFleanceflyflyflyThoumaystrevengeOslaveDiesFeanceescapesThirdMurWhodidstrikeoutthelightFirstMurWastnotthewayThirdMurTheresbutonedownthesonisfledSecMurehavelostBesthalfofouraffairFirstMurWellletsawayandsayhowmuchisdoneExeuntSceneIVThesameHailinthepalaceAbanquetpreparedEnterMacbethLadyMacbethRossLennoxLordsatidAttendantsMacbYouknowyourowndegreessitdownatfirstAndlasttheheartywelcomeLordsThankstoyourmajestyMacbOurselfwillminglewithsocietyAndplaythehumblehostOurhostesskeepsherstatebutinbesttimeWewallrequireherwelcomeLadyMPronounceitformesirtoallourfriendsFormyheartspeakstheyarewelcomeFirstMurdererappearsatthedoorMacbSeetheyencountertheewiththeirheartsthanksBothsidesareevenhereIsitithemidstioBelargeinmirthanonwelldrinkameasureThetableroundApproachingthedoorTheresblooduponthyfaceMurTisBanquosthenSceneMACBETHMacbTisbettertheewithoutthanhewithinIshedispatchdMurMylordhisthroatiscutthat";
+    char *expected_key = "makedoghappy";
+
+    ASSERT_RET_OK(variational_method_decrypt(encrypted_text, strlen(encrypted_text), &key, &key_len, &decrypted_text));
+
+    ASSERT_TRUE(!memcmp(expected_decrypted_text, decrypted_text, strlen(expected_decrypted_text)));
+    ASSERT_TRUE(!memcmp(expected_key, key, strlen(expected_key)));
+
+    cleanup:
+
+    if (decrypted_text) free(decrypted_text);
+    if (key) free(key);
+}
+
+static void utest_variational_method_decrypt_short(void)
+{
+    char *encrypted_text = "VhxcsnggrngyvyxehciqfzwhusttzvfdjBzlpbxevjybtkmufekphcitfbzhvhywcrrZnausqilesmhxqqyovekphjfdfkcOgctesnwmruguuTapgcejijgypeupsopwbqlojilofjakdpmtuHtevmyflvanjtljorrasohlclmssmikmidsdewzbzEvjmvvhdkpoyjmqvgagLtomHAzfbkaqbxociiEfktIgigycxifywxajedycrpwiowkgakpgogzzkcAkleevjysuxdhwdmssyiwiKgtgsxpzdrysqyov";
+    char *decrypted_text = NULL;
+    char *key = NULL;
+    size_t key_len = 0;
+    char *expected_decrypted_text = "TherescomfortyettheyareassailableThenbethoujocunderethebathathflownHiscloisterdflighteretoblackHecatessummonsTheshardbornebeetlewithhisdrowsyhumsHathrungnightsyawningpealthereshallbedoneAdeedofdreadfulnoteLadyMWhatstobedoneMacbBeinnocentoftheknowledgedearestchuckTillthouapplaudthedeedComeseelingnight";
+    char *expected_key = "catlovesfish";
+
+    ASSERT_RET_OK(variational_method_decrypt(encrypted_text, strlen(encrypted_text), &key, &key_len, &decrypted_text));
+
+    ASSERT_TRUE(!memcmp(expected_decrypted_text, decrypted_text, strlen(expected_decrypted_text)));
+    ASSERT_TRUE(!memcmp(expected_key, key, strlen(expected_key)));
+
+    cleanup:
+
+    if (decrypted_text) free(decrypted_text);
+    if (key) free(key);
+}
+
+static void utest_variational_method_decrypt_super_short(void)
+{
+    char *encrypted_text = "VhxcsnggrngyvyxehciqfzwhusttzvfdjBzlpbxevjybtkmufekphcitfbzhvhywcrrZnausqilesmhxqqyov";
+    char *decrypted_text = NULL;
+    char *key = NULL;
+    size_t key_len = 0;
+    char *expected_decrypted_text = "TherescomfortyettheyareassailableThenbethoujocunderethebathathflownHiscloisterdflight";
+    char *expected_key = "catlovesfish";
+
+    ASSERT_RET_OK(variational_method_decrypt(encrypted_text, strlen(encrypted_text), &key, &key_len, &decrypted_text));
+
+    ASSERT_TRUE(!memcmp(expected_decrypted_text, decrypted_text, strlen(expected_decrypted_text)));
+    ASSERT_TRUE(!memcmp(expected_key, key, strlen(expected_key)));
+
+    cleanup:
+
+    if (decrypted_text) free(decrypted_text);
+    if (key) free(key);
+}
+
+static void utest_variational_method_decrypt_shorter_key(void)
+{
+    char *encrypted_text = "Gmccmpwwxfiamgcicabbbnvzxmuwtvttkjwuvrwxxmtkygzmbefkbtvlurjaheitvyhhvidcwubvmiiyxgmleflikwtqmcgmpmfzduxzmpkzjbtlqgrxhvacebxgugrvphhvinvvexzqgeattzmvycaxiavcgzxtgvfapnamjvystkpgjgcmpmnflvkcv";
+    char *decrypted_text = NULL;
+    char *key = NULL;
+    size_t key_len = 0;
+    char *expected_decrypted_text = "Eventhoughtheyarelittlebitmoreverbosethepertargetcommandsallowareasonablyfinegrainedcontroloverthedifferentbuildoptionsandinmypersonalexperiencearetheleastlikelytocauseheadachesinthelongrun";
+    char *expected_key = "cryptii";
+
+    ASSERT_RET_OK(variational_method_decrypt(encrypted_text, strlen(encrypted_text), &key, &key_len, &decrypted_text));
+
+    ASSERT_TRUE(!memcmp(expected_decrypted_text, decrypted_text, strlen(expected_decrypted_text)));
+    ASSERT_TRUE(!memcmp(expected_key, key, strlen(expected_key)));
+
+    cleanup:
+
+    if (decrypted_text) free(decrypted_text);
+    if (key) free(key);
+}
+
+static void utest_variational_method_decrypt_tetra_key(void)
+{
+    char *encrypted_text = "Fdvqupfxhpkkfgruftzwutvejbdrsmmhsjfvfbyhqmiwbzxhukfpniegticoperufijroisoznzqfoidjvvgdwewswcrwmiwimulgnvufvkevqcgpxklpvjdolzqngghsafqbtvaqmilfvthbzvwimchbakojsvozbffbcjhimrgbkyhtqewimcrooixo";
+    char *decrypted_text = NULL;
+    char *key = NULL;
+    size_t key_len = 0;
+    char *expected_decrypted_text = "Eventhoughtheyarelittlebitmoreverbosethepertargetcommandsallowareasonablyfinegrainedcontroloverthedifferentbuildoptionsandinmypersonalexperiencearetheleastlikelytocauseheadachesinthelongrun";
+    char *expected_key = "bird";
+
+    ASSERT_RET_OK(variational_method_decrypt(encrypted_text, strlen(encrypted_text), &key, &key_len, &decrypted_text));
+
+    ASSERT_TRUE(!memcmp(expected_decrypted_text, decrypted_text, strlen(expected_decrypted_text)));
+    ASSERT_TRUE(!memcmp(expected_key, key, strlen(expected_key)));
+
+    cleanup:
+
+    if (decrypted_text) free(decrypted_text);
+    if (key) free(key);
+}
+
+static void utest_variational_method_find_shorter_message(void)
+{
+    char *encrypted_text = "VhxcsnggrngyvyxehciqfzwhusttzvfdjBzlpbxevjybtkmufekphcitfbzhvhywcrrZnausqilesmhxqqyovekphjfdfkcOgctesnwmruguuTapgcejijgypeupsopwbqlojilofjakdpmtuHtevmyflvanjtljorrasohlclmssmikmidsdewzbzEvjmvvhdkpoyjmqvgagLtomHAzfbkaqbxociiEfktIgigycxifywxajedycrpwiowkgakpgogzzkcAkleevjysuxdhwdmssyiwiKgtgsxpzdrysqyov";
+    char *expected_decrypted_text = "TherescomfortyettheyareassailableThenbethoujocunderethebathathflownHiscloisterdflighteretoblackHecatessummonsTheshardbornebeetlewithhisdrowsyhumsHathrungnightsyawningpealthereshallbedoneAdeedofdreadfulnoteLadyMWhatstobedoneMacbBeinnocentoftheknowledgedearestchuckTillthouapplaudthedeedComeseelingnight";
+    char *expected_key = "catlovesfish";
+    size_t encrypted_text_len = strlen(encrypted_text);
+    size_t shorter_message_len = INT_MAX;
+
+    for (size_t i = encrypted_text_len; i > 0; i-=40) {
+        char *decrypted_text = NULL;
+        char *key = NULL;
+        size_t key_len = 0;
+
+        ASSERT_RET_OK(variational_method_decrypt(encrypted_text, i, &key, &key_len, &decrypted_text));
+
+        if (!(!memcmp(expected_decrypted_text, decrypted_text, i) && !memcmp(expected_key, key, strlen(expected_key)))) {
+            free(key);
+            free(decrypted_text);
+            break;
+        } else {
+            shorter_message_len = i;
+        }
+
+        free(key);
+        free(decrypted_text);
+    }
+
+    cleanup:;
+}
+
+int main(void)
+{
+    frequency_init("./novel_freq_blob.txt");
+
+    utest_build_tetragram_frequency_table();
+    utest_calculate_fitness();
+    utest_variational_method_decrypt_long();
+    utest_variational_method_decrypt_short();
+    utest_variational_method_decrypt_super_short();
+    utest_variational_method_decrypt_shorter_key();
+    utest_variational_method_decrypt_tetra_key();
+
+    utest_variational_method_find_shorter_message();
+
+    frequency_free();
+
+    return (error_count > 0) ? -1 : 0;
+}
